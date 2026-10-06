@@ -1,20 +1,37 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Silicon Atlas — Mac 칩 런타임 맵</title>
+    <title>Silicon Atlas — Mac 芯片运行时地图</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { width: 100%; height: 100%; background: #020605; overflow: hidden; }
+        html, body { width: 100%; height: 100%; background: #020605; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
         canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+        #langSwitch { position: fixed; top: 12px; right: 16px; z-index: 999; background: rgba(2,6,5,0.9); border: 1px solid #294237; border-radius: 4px; padding: 6px 10px; color: #d9ebe1; font-size: 12px; cursor: pointer; font-family: "JetBrains Mono", monospace; }
+        #langSwitch:hover { border-color: #20ff91; color: #20ff91; }
     </style>
+    <script>
+        window.LANG = localStorage.getItem('silicon_lang') || 'ko';
+        document.documentElement.lang = window.LANG;
+    </script>
 </head>
 <body>
-    <canvas id="stage" role="img" aria-label="Silicon Atlas 모션그래픽. Apple Silicon M1~M6 칩의 CPU, GPU, Neural, Memory, Media 모듈을 시각화합니다. 클릭하면 처음부터 재생됩니다."></canvas>
+    <canvas id="stage" role="img"></canvas>
+    <div id="langSwitch">KO / ZH</div>
+    <script>
+        document.getElementById('langSwitch').textContent = window.LANG === 'ko' ? 'KO / ZH' : 'ZH / KO';
+        document.getElementById('langSwitch').addEventListener('click', () => {
+            window.LANG = window.LANG === 'ko' ? 'zh' : 'ko';
+            localStorage.setItem('silicon_lang', window.LANG);
+            document.documentElement.lang = window.LANG;
+            document.getElementById('langSwitch').textContent = window.LANG === 'ko' ? 'KO / ZH' : 'ZH / KO';
+            location.reload();
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>

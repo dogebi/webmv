@@ -6,7 +6,9 @@ const ctx = canvas.getContext('2d');
 const DURATION = 10;
 const VW = 1600, VH = 900, CX = VW / 2, CY = VH / 2;
 const KR = '"Noto Sans KR", sans-serif';
+const ZH = '"Noto Sans SC", sans-serif';
 const MONO = '"JetBrains Mono", monospace';
+const LANG = window.LANG || document.documentElement.lang || 'ko';
 const C = {
   bg: '#020605', panel: '#07110d', ink: '#d9ebe1', muted: '#769187', line: '#294237',
   green: '#20ff91', amber: '#f0b941', blue: '#7eaeff', cyan: '#60d9ff',
@@ -38,13 +40,49 @@ const CHIPS = [
 ].map(([name, year, m]) => ({ name, year, m, avg: Math.round(m.reduce((a, b) => a + b, 0) / 5) }));
 
 const MODULES = [
-  { key: 'CPU', ko: 'CPU 클러스터', en: 'CPU CLUSTER', color: C.green, m6: '12 CORE' },
-  { key: 'GPU', ko: 'GPU 어레이', en: 'GPU ARRAY', color: C.amber, m6: '12 CORE' },
-  { key: 'NPU', ko: '뉴럴 엔진', en: 'NEURAL ENGINE', color: C.green, m6: 'DUAL 16 CORE' },
-  { key: 'MEM', ko: '통합 메모리', en: 'UNIFIED MEMORY', color: C.blue, m6: '153 / 170 GB/s' },
-  { key: 'MED', ko: '미디어 엔진', en: 'MEDIA ENGINE', color: C.blue, m6: 'AV1 / PRORES' },
+  { key: 'CPU', ko: 'CPU 클러스터', zh: 'CPU 集群', en: 'CPU CLUSTER', color: C.green, m6: '12 CORE' },
+  { key: 'GPU', ko: 'GPU 어레이', zh: 'GPU 阵列', en: 'GPU ARRAY', color: C.amber, m6: '12 CORE' },
+  { key: 'NPU', ko: '뉴럴 엔진', zh: '神经引擎', en: 'NEURAL ENGINE', color: C.green, m6: 'DUAL 16 CORE' },
+  { key: 'MEM', ko: '통합 메모리', zh: '统一内存', en: 'UNIFIED MEMORY', color: C.blue, m6: '153 / 170 GB/s' },
+  { key: 'MED', ko: '미디어 엔진', zh: '媒体引擎', en: 'MEDIA ENGINE', color: C.blue, m6: 'AV1 / PRORES' },
 ];
 const METRICS = ['CPU SINGLE', 'CPU MULTI', 'GPU GRAPHICS', 'MEMORY BW', 'AI COMPUTE'];
+
+const i18n = (key) => {
+  const texts = {
+    boot_line1: { ko: '> init chip_runtime --generations 6', zh: '> init chip_runtime --generations 6' },
+    boot_line2: { ko: '> load modules [CPU, GPU, NEURAL, MEMORY, MEDIA]', zh: '> load modules [CPU, GPU, NEURAL, MEMORY, MEDIA]' },
+    boot_line3: { ko: '> registry: 19 apple silicon models ... OK', zh: '> registry: 19 apple silicon models ... OK' },
+    title_main: { ko: 'Mac 칩', zh: 'Mac 芯片' },
+    title_sub: { ko: '런타임 맵.', zh: '运行时地图。' },
+    subtitle: { ko: 'Apple Silicon 세대별 CPU, GPU, Neural, Memory, Media 경로를 추적합니다.', zh: '追踪 Apple Silicon 各代芯片的 CPU、GPU、神经、内存、媒体路径。' },
+    die_caption: { ko: '하나의 칩, 다섯 개의 모듈', zh: '一芯，五路' },
+    die_label: { ko: 'UNIFIED ARCHITECTURE · 5 MODULES', zh: 'UNIFIED ARCHITECTURE · 5 MODULES' },
+    lineup_title: { ko: '전체 실리콘 라인업.', zh: '完整硅芯线阵。' },
+    lineup_subtitle: { ko: '19 MODELS · M1 → M6 · 2020 → 2026', zh: '19 MODELS · M1 → M6 · 2020 → 2026' },
+    legend_base: { ko: 'BASE', zh: 'BASE' },
+    legend_pro: { ko: 'PRO', zh: 'PRO' },
+    legend_max: { ko: 'MAX', zh: 'MAX' },
+    legend_ultra: { ko: 'ULTRA', zh: 'ULTRA' },
+    legend_note: { ko: '평균 지수 · ILLUSTRATIVE INDEX / NOT LAB BENCHMARK', zh: '平均指数 · ILLUSTRATIVE INDEX / NOT LAB BENCHMARK' },
+    map_title: { ko: '하나의 칩, 열아홉 개의 경로.', zh: '一芯，十九路。' },
+    map_label: { ko: 'KNOWLEDGE MAP', zh: 'KNOWLEDGE MAP' },
+    compare_title: { ko: '비교 콘솔', zh: '对比控制台' },
+    compare_note: { ko: '* 참조값은 세대 차이를 시각적으로 비교하기 위한 값이며 실험실 벤치마크가 아닙니다.', zh: '* 参考值仅用于可视化对比代际差异，非实验室基准测试。' },
+    compare_ratio: { ko: (r) => `×${r}`, zh: (r) => `×${r}` },
+    outro_title: { ko: 'SILICON ATLAS', zh: 'SILICON ATLAS' },
+    outro_subtitle: { ko: 'Mac 칩 런타임 맵 · M1 → M6 · 19 MODELS · 5 MODULES', zh: 'Mac 芯片运行时地图 · M1 → M6 · 19 MODELS · 5 MODULES' },
+    outro_url: { ko: 'dogebi.github.io/macsilcon', zh: 'dogebi.github.io/macsilcon' },
+    hud_process: { ko: '프로세스', zh: '过程' },
+    hud_gen: { ko: '세대', zh: '代' },
+    hud_modules: { ko: '모듈', zh: '模块' },
+    hud_status: { ko: '상태', zh: '状态' },
+    hud_online: { ko: '온라인', zh: '在线' },
+    hud_title: { ko: 'SILICON ATLAS', zh: 'SILICON ATLAS' },
+    hud_support: { ko: 'WEBMCP 지원 · 모션 감소 지원', zh: 'WEBMCP 支持 · 运动减少支持' },
+  };
+  return texts[key]?.[LANG] || texts[key]?.['ko'] || key;
+};
 
 let W = 0, H = 0, DPR = 1, K = 1, OX = 0, OY = 0;
 let start = 0;
@@ -103,10 +141,10 @@ function typed(str, x, y, p, opts = {}) {
 }
 
 // Each glyph drops in from above with blur, staggered: kinetic headline type.
-function kinetic(str, x, y, t0, t, { size = 96, weight = 900, color = C.ink, stagger = 0.035, dur = 0.55, alpha = 1, accent = -1, accentColor = C.green } = {}) {
-  const font = `${weight} ${size}px ${KR}`;
+function kinetic(str, x, y, t0, t, { size = 96, weight = 900, color = C.ink, stagger = 0.035, dur = 0.55, alpha = 1, accent = -1, accentColor = C.green, font = KR } = {}) {
+  const fontStr = `${weight} ${size}px ${font}`;
   ctx.save();
-  ctx.font = font;
+  ctx.font = fontStr;
   const chars = [...str];
   const widths = chars.map(ch => ctx.measureText(ch).width);
   ctx.restore();
@@ -116,7 +154,7 @@ function kinetic(str, x, y, t0, t, { size = 96, weight = 900, color = C.ink, sta
     const k = easeOutExpo(seg(t, t0 + i * stagger, t0 + i * stagger + dur));
     const w = widths[i];
     text(ch, cx + w / 2, y - (1 - k) * 70, {
-      font,
+      font: fontStr,
       color: i >= accent && accent >= 0 ? accentColor : color,
       alpha: k * alpha,
       blur: (1 - k) * 16,
@@ -199,12 +237,12 @@ function drawHud(t, alpha) {
   ctx.lineTo(VW - 60, y + 22);
   ctx.stroke();
   ctx.globalAlpha = 1;
-  const items = [['프로세스', 'chip_runtime'], ['세대', '6'], ['모듈', '5'], ['상태', '온라인']];
+  const items = [[i18n('hud_process'), 'chip_runtime'], [i18n('hud_gen'), '6'], [i18n('hud_modules'), '5'], [i18n('hud_status'), i18n('hud_online')]];
   let x = 60;
   items.forEach(([k, v], i) => {
     const p = seg(t, 0.15 + i * 0.12, 0.55 + i * 0.12);
-    text(k, x, y, { font: `500 14px ${KR}`, color: C.muted, align: 'left', alpha: alpha * p });
-    ctx.font = `500 14px ${KR}`;
+    text(k, x, y, { font: `500 14px ${LANG === 'zh' ? ZH : KR}`, color: C.muted, align: 'left', alpha: alpha * p });
+    ctx.font = `500 14px ${LANG === 'zh' ? ZH : KR}`;
     const kw = ctx.measureText(k).width;
     typed(v, x + kw + 10, y, p, { font: `700 14px ${MONO}`, color: i === 3 ? C.green : C.ink, alpha });
     x += 260;
@@ -216,30 +254,25 @@ function drawHud(t, alpha) {
   ctx.arc(VW - 72, y, 5, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 1;
-  text('SILICON ATLAS', VW - 88, y, { font: `700 14px ${MONO}`, color: C.ink, align: 'right', alpha: alpha * seg(t, 0.3, 0.7) });
+  text(i18n('hud_title'), VW - 88, y, { font: `700 14px ${MONO}`, color: C.ink, align: 'right', alpha: alpha * seg(t, 0.3, 0.7) });
 }
 
 /* ---------- scene 1: boot + title ---------- */
-
-const BOOT = [
-  '> init chip_runtime --generations 6',
-  '> load modules [CPU, GPU, NEURAL, MEMORY, MEDIA]',
-  '> registry: 19 apple silicon models ... OK',
-];
 
 function drawBoot(t) {
   if (t > 2.3) return;
   const out = easeInCubic(seg(t, 1.75, 2.2));
   const a = 1 - out;
+  const BOOT = [i18n('boot_line1'), i18n('boot_line2'), i18n('boot_line3')];
   BOOT.forEach((line, i) => {
     const p = seg(t, 0.1 + i * 0.28, 0.45 + i * 0.28);
     typed(line, 160, 190 + i * 34, p, { font: `400 19px ${MONO}`, color: i === 2 && p >= 1 ? C.green : C.muted, alpha: a });
   });
-  kinetic('Mac 칩', CX, CY + 30 - out * 60, 0.75, t, { size: 150, alpha: a });
-  kinetic('런타임 맵.', CX, CY + 190 - out * 60, 0.95, t, { size: 150, alpha: a, accent: 0, accentColor: C.green });
+  kinetic(i18n('title_main'), CX, CY + 30 - out * 60, 0.75, t, { size: 150, alpha: a, font: LANG === 'zh' ? ZH : KR });
+  kinetic(i18n('title_sub'), CX, CY + 190 - out * 60, 0.95, t, { size: 150, alpha: a, accent: 0, accentColor: C.green, font: LANG === 'zh' ? ZH : KR });
   const sub = seg(t, 1.25, 1.55);
-  text('Apple Silicon 세대별 CPU, GPU, Neural, Memory, Media 경로를 추적합니다.', CX, CY + 300, {
-    font: `500 22px ${KR}`, color: C.muted, alpha: sub * a,
+  text(i18n('subtitle'), CX, CY + 300, {
+    font: `500 22px ${LANG === 'zh' ? ZH : KR}`, color: C.muted, alpha: sub * a,
   });
 }
 
@@ -351,7 +384,7 @@ function drawDie(t) {
   }
   ctx.restore();
 
-  // Side captions with Korean module names.
+  // Side captions with module names.
   MODULES.forEach((m, i) => {
     const p = seg(t, 2.5 + i * 0.12, 2.85 + i * 0.12) * (1 - seg(t, 3.75, 3.95));
     const right = i === 1 || i === 4;
@@ -361,13 +394,14 @@ function drawDie(t) {
     ctx.fillStyle = m.color;
     ctx.fillRect(right ? x - 40 : x + 10, y - 1, 30 * p, 2);
     ctx.globalAlpha = 1;
-    text(m.ko, x + (right ? 0 : 0), y, { font: `700 26px ${KR}`, color: C.ink, align: right ? 'left' : 'right', alpha: p });
+    const langKey = LANG === 'zh' ? 'zh' : 'ko';
+    text(m[langKey], x + (right ? 0 : 0), y, { font: `700 26px ${LANG === 'zh' ? ZH : KR}`, color: C.ink, align: right ? 'left' : 'right', alpha: p });
     text(`0${i + 1}`, x, y + 28, { font: `500 13px ${MONO}`, color: m.color, align: right ? 'left' : 'right', alpha: p });
   });
 
   const head = seg(t, 2.0, 2.3) * (1 - seg(t, 3.75, 3.95));
-  text('UNIFIED ARCHITECTURE · 5 MODULES', CX, 120, { font: `700 18px ${MONO}`, color: C.green, alpha: head, glow: 12 });
-  text('하나의 칩, 다섯 개의 모듈', CX, VH - 80, { font: `700 30px ${KR}`, color: C.ink, alpha: head });
+  text(i18n('die_label'), CX, 120, { font: `700 18px ${MONO}`, color: C.green, alpha: head, glow: 12 });
+  text(i18n('die_caption'), CX, VH - 80, { font: `700 30px ${LANG === 'zh' ? ZH : KR}`, color: C.ink, alpha: head });
 }
 
 /* ---------- scene 3: lineup graph ---------- */
@@ -379,8 +413,8 @@ function drawLineup(t) {
   const bw = (right - left) / CHIPS.length;
   const maxAvg = 300;
 
-  kinetic('전체 실리콘 라인업.', CX, 140, 4.1, t, { size: 64, alpha: a, accent: 3 });
-  text('19 MODELS · M1 → M6 · 2020 → 2026', CX, 200, { font: `500 16px ${MONO}`, color: C.muted, alpha: seg(t, 4.35, 4.6) * a });
+  kinetic(i18n('lineup_title'), CX, 140, 4.1, t, { size: 64, alpha: a, accent: 3, font: LANG === 'zh' ? ZH : KR });
+  text(i18n('lineup_subtitle'), CX, 200, { font: `500 16px ${MONO}`, color: C.muted, alpha: seg(t, 4.35, 4.6) * a });
 
   const axis = easeOutExpo(seg(t, 4.15, 4.6));
   ctx.globalAlpha = a;
@@ -422,7 +456,6 @@ function drawLineup(t) {
     ctx.globalAlpha = 1;
     text(c.name, x + w / 2, base + 16, { font: `500 12px ${MONO}`, color: i === peak ? C.amber : C.ink, align: 'right', alpha: k * a, rot: -Math.PI / 4 });
     if (k > 0.85) text(String(Math.round(c.avg * k)), x + w / 2, base - h - 14, { font: `700 12px ${MONO}`, color, alpha: a * seg(k, 0.85, 1) });
-    // Trend line connecting bar tops.
     const tx = x + w / 2, ty = base - h;
     if (i > 0 && k > 0) {
       ctx.globalAlpha = a * k * 0.5;
@@ -440,7 +473,7 @@ function drawLineup(t) {
   });
 
   const legend = seg(t, 5.2, 5.5) * a;
-  [['BASE', C.green], ['PRO', C.blue], ['MAX', C.cyan], ['ULTRA', C.amber]].forEach(([l, col], i) => {
+  [[i18n('legend_base'), C.green], [i18n('legend_pro'), C.blue], [i18n('legend_max'), C.cyan], [i18n('legend_ultra'), C.amber]].forEach(([l, col], i) => {
     const x = CX - 230 + i * 120;
     ctx.globalAlpha = legend;
     ctx.fillStyle = col;
@@ -448,7 +481,7 @@ function drawLineup(t) {
     ctx.globalAlpha = 1;
     text(l, x + 22, VH - 65, { font: `500 14px ${MONO}`, color: C.ink, align: 'left', alpha: legend });
   });
-  text('평균 지수 · ILLUSTRATIVE INDEX / NOT LAB BENCHMARK', CX, VH - 32, { font: `500 13px ${KR}`, color: C.muted, alpha: legend });
+  text(i18n('legend_note'), CX, VH - 32, { font: `500 13px ${LANG === 'zh' ? ZH : KR}`, color: C.muted, alpha: legend });
 }
 
 /* ---------- scene 4: knowledge map ---------- */
@@ -495,7 +528,6 @@ function drawMap(t) {
     ctx.moveTo(CX, CY + 20);
     ctx.lineTo(ex, ey);
     ctx.stroke();
-    // Data pulse travelling along the path.
     const u = ((t * 1.3 + i * 0.2) % 1);
     ctx.fillStyle = m.color;
     ctx.shadowColor = m.color;
@@ -507,7 +539,8 @@ function drawMap(t) {
     ctx.globalAlpha = 1;
     const cw = 230, ch = 78;
     panel(ex - cw / 2, ey - ch / 2, cw, ch, a * k, m.color);
-    text(m.ko, ex - cw / 2 + 14, ey - 14, { font: `700 18px ${KR}`, color: C.ink, align: 'left', alpha: a * k });
+    const langKey = LANG === 'zh' ? 'zh' : 'ko';
+    text(m[langKey], ex - cw / 2 + 14, ey - 14, { font: `700 18px ${LANG === 'zh' ? ZH : KR}`, color: C.ink, align: 'left', alpha: a * k });
     text(m.m6, ex - cw / 2 + 14, ey + 16, { font: `700 16px ${MONO}`, color: m.color, align: 'left', alpha: a * k });
     text(String(CHIPS[18].m[i]), ex + cw / 2 - 14, ey + 16, { font: `700 22px ${MONO}`, color: m.color, align: 'right', alpha: a * k });
   });
@@ -536,12 +569,13 @@ function drawMap(t) {
     ctx.stroke();
     ctx.globalAlpha = 1;
     text('M6', CX, CY + 8, { font: `700 40px ${MONO}`, color: C.green, alpha: a * orb, glow: 16 });
-    text(`평균 지수 ${CHIPS[18].avg}`, CX, CY + 46, { font: `500 13px ${KR}`, color: C.ink, alpha: a * orb });
+    const avgText = LANG === 'zh' ? `平均指数 ${CHIPS[18].avg}` : `평균 지수 ${CHIPS[18].avg}`;
+    text(avgText, CX, CY + 46, { font: `500 13px ${LANG === 'zh' ? ZH : KR}`, color: C.ink, alpha: a * orb });
   }
 
   const title = seg(t, 6.25, 6.55);
-  text('하나의 칩, 열아홉 개의 경로.', CX, 90, { font: `900 46px ${KR}`, color: C.ink, alpha: title * a });
-  text('KNOWLEDGE MAP', CX, 135, { font: `500 15px ${MONO}`, color: C.green, alpha: title * a });
+  text(i18n('map_title'), CX, 90, { font: `900 46px ${LANG === 'zh' ? ZH : KR}`, color: C.ink, alpha: title * a });
+  text(i18n('map_label'), CX, 135, { font: `500 15px ${MONO}`, color: C.green, alpha: title * a });
 }
 
 /* ---------- scene 5: compare + outro ---------- */
@@ -553,7 +587,7 @@ function drawCompare(t) {
   const A = CHIPS[0], B = CHIPS[18];
 
   const head = easeOutExpo(seg(t, 8.2, 8.6));
-  text('비교 콘솔', CX, 110 - shift * 30, { font: `500 16px ${KR}`, color: C.green, alpha: head * fade * (1 - shift) });
+  text(i18n('compare_title'), CX, 110 - shift * 30, { font: `500 16px ${LANG === 'zh' ? ZH : KR}`, color: C.green, alpha: head * fade * (1 - shift) });
   text('M1', CX - 90, 175 - (1 - head) * 40, { font: `700 64px ${MONO}`, color: C.muted, alpha: head * fade * (1 - shift), align: 'right' });
   text('VS', CX, 175, { font: `700 26px ${MONO}`, color: C.ink, alpha: head * fade * (1 - shift) });
   text('M6', CX + 90, 175 + (1 - head) * 40, { font: `700 64px ${MONO}`, color: C.green, alpha: head * fade * (1 - shift), align: 'left', glow: 18 });
@@ -578,21 +612,21 @@ function drawCompare(t) {
       text(`×${(B.m[i] / A.m[i]).toFixed(1)}`, left + maxW + 30, y + 16, { font: `700 30px ${MONO}`, color: C.green, align: 'left', alpha: alpha * seg(t, 9.0, 9.1), glow: 14 });
     }
   });
-  text('* 참조값은 세대 차이를 시각적으로 비교하기 위한 값이며 실험실 벤치마크가 아닙니다.', CX, VH - 60, {
-    font: `500 14px ${KR}`, color: C.muted, alpha: seg(t, 8.8, 9.0) * fade * (1 - shift),
+  text(i18n('compare_note'), CX, VH - 60, {
+    font: `500 14px ${LANG === 'zh' ? ZH : KR}`, color: C.muted, alpha: seg(t, 8.8, 9.0) * fade * (1 - shift),
   });
 
   // Outro lockup.
   if (shift > 0) {
-    kinetic('SILICON ATLAS', CX, CY - 40, 9.2, t, { size: 110, weight: 900, alpha: fade, stagger: 0.02, dur: 0.4 });
+    kinetic(i18n('outro_title'), CX, CY - 40, 9.2, t, { size: 110, weight: 900, alpha: fade, stagger: 0.02, dur: 0.4, font: MONO });
     const s = seg(t, 9.4, 9.6);
     const bw = 520 * easeOutExpo(s);
     ctx.globalAlpha = fade;
     ctx.fillStyle = C.green;
     ctx.fillRect(CX - bw / 2, CY + 30, bw, 4);
     ctx.globalAlpha = 1;
-    text('Mac 칩 런타임 맵 · M1 → M6 · 19 MODELS · 5 MODULES', CX, CY + 80, { font: `500 18px ${KR}`, color: C.ink, alpha: s * fade });
-    text('dogebi.github.io/macsilcon', CX, CY + 118, { font: `500 15px ${MONO}`, color: C.green, alpha: s * fade });
+    text(i18n('outro_subtitle'), CX, CY + 80, { font: `500 18px ${LANG === 'zh' ? ZH : KR}`, color: C.ink, alpha: s * fade });
+    text(i18n('outro_url'), CX, CY + 118, { font: `500 15px ${MONO}`, color: C.green, alpha: s * fade });
   }
 }
 
@@ -674,7 +708,7 @@ function drawFinish(t) {
   ctx.textAlign = 'left';
   ctx.fillText(`0${idx} / 05`, 20, H - 14);
   ctx.textAlign = 'right';
-  ctx.fillText('WEBMCP 지원 · 모션 감소 지원', W - 20, H - 14);
+  ctx.fillText(i18n('hud_support'), W - 20, H - 14);
 }
 
 function render(t) {
